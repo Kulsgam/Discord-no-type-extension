@@ -1,0 +1,19 @@
+{
+  "name": "discord-no-type-indicator",
+  "version": "0.0.1",
+  "description": "Wouldn't show others that you will be typing in discord",
+  "author": "Kulsgam",
+  "scripts": {
+    "build": "npx tsc && npx tailwindcss build -i src/tailwind.css -o out/css/tailwind.css"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.243",
+    "prettier-plugin-tailwindcss": "^0.5.3"
+  },
+  "dependencies": {
+    "autoprefixer": "^10.4.15",
+    "postcss": "^8.4.28",
+    "tailwindcss": "^3.3.3",
+    "typescript": "^5.1.6"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "Discord type indicator blocker",
+  "version": "0.0.1",
+  "description": "Blocks others from seeing when you are typing.",
+  "background": {
+    "service_worker": "out/js/background.js"
+  },
+  "permissions": [
+    "declarativeNetRequest",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "*://*.discord.com/*"
+  ],
+  "action": {
+    "default_popup": "out/html/popup.html",
+    "default_icon": {
+      "16": "images/icon16.png",
+      "48": "images/icon48.png",
+      "128": "images/icon128.png"
+    }
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self';"
+  }
+}
