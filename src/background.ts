@@ -5,35 +5,13 @@ chrome.runtime.onInstalled.addListener(() => {
 
 function enableExtension() {
   console.log("enable called");
-  chrome.declarativeNetRequest.getDynamicRules(async (rules) => {
-    if (rules.find((rule) => rule.id === 1)) {
-      // This is needed because if not it fails ¯\_(ツ)_/¯
-      await chrome.declarativeNetRequest.updateDynamicRules({
-        removeRuleIds: [1],
-      });
+  chrome.storage.local.get("isEnabled", (result) => {
+    if (result.isEnabled) {
+      console.log("Extension is already enabled");
+      return;
     }
-    await chrome.declarativeNetRequest.updateDynamicRules({
-      addRules: [
-        {
-          id: 1,
-          priority: 1,
-          action: { type: chrome.declarativeNetRequest.RuleActionType.BLOCK },
-          condition: {
-            urlFilter: "*discord.com/api/*/channels/*/typing*",
-            initiatorDomains: ["discord.com"],
-          },
-        },
-      ],
-    });
-    await chrome.storage.local.set({ isEnabled : true });
-  });
-}
-
-function disableExtension() {
-  chrome.declarativeNetRequest.getDynamicRules(async (rules) => {
-    if (!rules.find((rule) => rule.id === 1)) {
-      // This is needed because if not it fails ¯\_(ツ)_/¯
-      await chrome.declarativeNetRequest.updateDynamicRules({
+    chrome.declarativeNetRequest.updateDynamicRules(
+      {
         addRules: [
           {
             id: 1,
@@ -45,12 +23,45 @@ function disableExtension() {
             },
           },
         ],
-      });
+      },
+      () => {
+        if (chrome.runtime.lastError) {
+          console.log("Enabling error");
+        } else {
+          console.log("Enabling success");
+        }
+      },
+    );
+    chrome.storage.local.set({ isEnabled: true });
+  });
+}
+
+function disableExtension() {
+  console.log("disable called");
+  chrome.storage.local.get("isEnabled", (result) => {
+    if (!result.isEnabled) {
+      console.log("Extension is already disabled");
+      return;
     }
-    await chrome.declarativeNetRequest.updateDynamicRules({
-      removeRuleIds: [1],
-    });
-    await chrome.storage.local.set({ isEnabled : true });
+    chrome.declarativeNetRequest.updateDynamicRules(
+      {
+        removeRuleIds: [1],
+      },
+      () => {
+        if (chrome.runtime.lastError) {
+          console.log("Disabling error");
+        } else {
+          console.log("Disabling success");
+        }
+      },
+    );
+    chrome.storage.local.set({ isEnabled: false });
+  });
+}
+
+function printRules() {
+  chrome.declarativeNetRequest.getDynamicRules((rules) => {
+    console.log(rules);
   });
 }
 
@@ -60,11 +71,51 @@ chrome.storage.local.get("isEnabled", (result) => {
     enabled = !!result.isEnabled;
   }
 
-  if (enabled) enableExtension();
-  else disableExtension();
+  chrome.storage.local.set({ isEnabled: enabled });
+
+  if (enabled) {
+    /* Initial enabling should account for already existing rule */
+    /* removeRuleIds will always be called before addRules */
+    chrome.declarativeNetRequest.updateDynamicRules(
+      {
+        removeRuleIds: [1],
+        addRules: [
+          {
+            id: 1,
+            priority: 1,
+            action: { type: chrome.declarativeNetRequest.RuleActionType.BLOCK },
+            condition: {
+              urlFilter: "*discord.com/api/*/channels/*/typing*",
+              initiatorDomains: ["discord.com"],
+            },
+          },
+        ],
+      },
+      () => {
+        if (chrome.runtime.lastError) {
+          console.log("Initial enabling failed");
+        } else {
+          console.log("Initial enabling success");
+        }
+      },
+    );
+  } else {
+    chrome.declarativeNetRequest.updateDynamicRules(
+      {
+        removeRuleIds: [1],
+      },
+      () => {
+        if (chrome.runtime.lastError) {
+          console.log("Initial disabling failed");
+        } else {
+          console.log("Initial disabling success");
+        }
+      },
+    );
+  }
 });
 
-chrome.runtime.onMessage.addListener(async (message, _, __) => {
+chrome.runtime.onMessage.addListener((message) => {
   if (message.action === "enable") enableExtension();
   else if (message.action === "disable") disableExtension();
 });
