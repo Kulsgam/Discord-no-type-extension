@@ -8,23 +8,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-console.log('Discord typing block running.');
+console.log("Discord typing block running.");
 chrome.runtime.onInstalled.addListener(() => {
-    console.log('Discord typing block installed.');
+    console.log("Discord typing block installed.");
 });
-let isEnabled = false;
-chrome.storage.local.get('isEnabled', (result) => __awaiter(void 0, void 0, void 0, function* () {
-    if (result.isEnabled === undefined) {
-        yield chrome.storage.local.set({ isEnabled: true });
-        return;
-    }
-    isEnabled = !!result.isEnabled;
-}));
-chrome.runtime.onMessage.addListener((message, _, __) => __awaiter(void 0, void 0, void 0, function* () {
-    if (message.action === 'enable') {
-        if (isEnabled)
-            return;
-        isEnabled = true;
+function enableExtension() {
+    console.log("enable called");
+    chrome.declarativeNetRequest.getDynamicRules((rules) => __awaiter(this, void 0, void 0, function* () {
+        if (rules.find((rule) => rule.id === 1)) {
+            // This is needed because if not it fails ¯\_(ツ)_/¯
+            yield chrome.declarativeNetRequest.updateDynamicRules({
+                removeRuleIds: [1],
+            });
+        }
         yield chrome.declarativeNetRequest.updateDynamicRules({
             addRules: [
                 {
@@ -32,22 +28,53 @@ chrome.runtime.onMessage.addListener((message, _, __) => __awaiter(void 0, void 
                     priority: 1,
                     action: { type: chrome.declarativeNetRequest.RuleActionType.BLOCK },
                     condition: {
-                        urlFilter: '*discord.com/api/*/channels/*/typing*',
-                        initiatorDomains: ['discord.com'],
+                        urlFilter: "*discord.com/api/*/channels/*/typing*",
+                        initiatorDomains: ["discord.com"],
                     },
                 },
             ],
         });
-        yield chrome.storage.local.set({ isEnabled });
-    }
-    else if (message.action === 'disable') {
-        if (!isEnabled)
-            return;
-        isEnabled = false;
+        yield chrome.storage.local.set({ isEnabled: true });
+    }));
+}
+function disableExtension() {
+    chrome.declarativeNetRequest.getDynamicRules((rules) => __awaiter(this, void 0, void 0, function* () {
+        if (!rules.find((rule) => rule.id === 1)) {
+            // This is needed because if not it fails ¯\_(ツ)_/¯
+            yield chrome.declarativeNetRequest.updateDynamicRules({
+                addRules: [
+                    {
+                        id: 1,
+                        priority: 1,
+                        action: { type: chrome.declarativeNetRequest.RuleActionType.BLOCK },
+                        condition: {
+                            urlFilter: "*discord.com/api/*/channels/*/typing*",
+                            initiatorDomains: ["discord.com"],
+                        },
+                    },
+                ],
+            });
+        }
         yield chrome.declarativeNetRequest.updateDynamicRules({
             removeRuleIds: [1],
         });
-        yield chrome.storage.local.set({ isEnabled });
+        yield chrome.storage.local.set({ isEnabled: true });
+    }));
+}
+chrome.storage.local.get("isEnabled", (result) => {
+    let enabled = true; // In case it's undefined or null, default to true
+    if (result.isEnabled !== undefined && result.isEnabled !== null) {
+        enabled = !!result.isEnabled;
     }
+    if (enabled)
+        enableExtension();
+    else
+        disableExtension();
+});
+chrome.runtime.onMessage.addListener((message, _, __) => __awaiter(void 0, void 0, void 0, function* () {
+    if (message.action === "enable")
+        enableExtension();
+    else if (message.action === "disable")
+        disableExtension();
 }));
 //# sourceMappingURL=background.js.map
