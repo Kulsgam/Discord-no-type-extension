@@ -1,4 +1,4 @@
-![image](https://github.com/Kulsgam/Discord-type-indicator-blocker/assets/90457704/639fd3ad-26ef-4cfb-82cf-761c6c2f8d75)# Discord type indicator blocker
+# Discord type indicator blocker
 <div align="center">
   <img src="images/1.png" alt="Control panel image"/>
 </div>
@@ -22,3 +22,4 @@
 
 ## Issues
 Brave has [issues](https://github.com/brave/brave-browser/issues/30854), and I've found a temporary fix as I have commented, but I've got to test it further
+The issue should be fixed on version 0.0.3
