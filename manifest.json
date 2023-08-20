@@ -6,6 +6,12 @@
   "background": {
     "service_worker": "out/js/background.js"
   },
+  "content_scripts": [
+    {
+      "matches": ["*://*.discord.com/*"],
+      "js": ["out/js/content.js"]
+    }
+  ],
   "permissions": [
     "declarativeNetRequest",
     "scripting",

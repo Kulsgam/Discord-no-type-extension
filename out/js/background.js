@@ -103,7 +103,9 @@ chrome.storage.local.get("isEnabled", (result) => {
     }
 });
 chrome.runtime.onMessage.addListener((message) => {
-    if (message.action === "enable")
+    if (message.action === "urlLoaded")
+        chrome.runtime.reload();
+    else if (message.action === "enable")
         enableExtension();
     else if (message.action === "disable")
         disableExtension();
