@@ -22,4 +22,5 @@
 
 ## Issues
 Brave has [issues](https://github.com/brave/brave-browser/issues/30854), and I've found a temporary fix as I have commented, but I've got to test it further
-The issue should be fixed on version 0.0.3
+
+The issue should be fixed on version 0.0.3 of the extension
